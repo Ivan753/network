@@ -104,7 +104,8 @@ console.log(enters);
 
 
 //Basic go-----------------------
-
+max = 0;
+id_max = 0;
 function recognize(){
 	
 //first layer
@@ -152,6 +153,120 @@ for(i = 0; i<10; i++){
 //console.log(output);
 }
 	
+	
+for(i = 0; i<10; i++){
+	
+	if(output[i]>max){
+	id_max = i;
+	max = output[i];
+	}
+}
 console.log(output);
 	
+}
+
+
+p = 0;
+epoh = 7500;
+
+learn_img = [];
+
+for(i = 0; i<10; i++){
+		
+	learn_img[i] = new Image;	
+	learn_img[i].src = i+'.png';
+
+}
+
+function preparation(){
+	u = Math.round(Math.random()*9);
+	u1 = Math.round(Math.random()*9);
+	u2 = Math.round(Math.random()*4);
+	ctx.drawImage(learn_img[u], u1*32, u2*32, 32, 32, 0, 0, 32, 32);
+}
+
+basic_error = [];
+
+function train(){
+
+learn_rate = 1;
+error = 0;
+errors = [];
+weights_delta = [];
+weights_delta_2 = [];
+weights_delta_3 = [];
+
+//for(p = 0; p < epoh; p++){
+
+progress = Math.round((p / epoh)*100);
+
+	//for(u = 0; u < 4; u++){
+	
+	//console.log(values[u]+' '+x);
+	preparation();
+	read();
+	recognize();
+	
+	//count basic errors
+	for(i = 0; i<10; i++){
+		
+		if(i==id_max){
+			basic_error[i] = 1 - output[i];
+		}else{
+			basic_error[i] = 0 - output[i];
+		}
+	
+	}
+	
+//последний слой 
+for(i = 0; i<10; i++){
+
+	weights_delta[i] = new Array();
+	
+	for(j = 0; j<30; j++){
+		weights_delta[i][j] = basic_error[i]*output[i]*(1 - output[i]);
+		weights_3[i][j] = weights_3[i][j] - values_2[j]*weights_delta[i][j]*learn_rate;
+	}
+}
+	
+//предпоследний слой	
+	for(i = 0; i<30; i++){
+		weights_delta_2[i] = new Array();
+		for(j = 0; j<30; j++){	
+		
+		errors[i] = weights_3[i][j]*weights_delta[i][j];
+		weights_delta_2[i][j] = (errors[i]*values_2[j])*(1 - values_2[i]);
+		weights_2[i][j] = weights_2[i][j] - values_1[j]*weights_delta_2[i][j]*learn_rate;
+		}
+
+	}
+//второй слой	
+	for(i = 0; i<30; i++){
+		weights_delta_3[i] = new Array();
+		for(j = 0; j<1024; j++){	
+		
+		errors[i] = weights_2[i][j]*weights_delta_2[i][j];
+		weights_delta_3[i][j] = (errors[i]*enters[j])*(1 - enters[j]);//дельта будет всегда равняться нулю
+		weights_1[i][j] = weights_1[i][j] - enters[j]*weights_delta_3[i][j]*learn_rate;
+		}
+
+	}
+
+	document.getElementById("results").innerHTML = 'Progress: '+progress+'%<br>Error: '+error;
+
+	//}
+//}
+p++;
+if(p == epoh){
+
+clearInterval(timerId_train);
+alert("Stop");
+document.getElementById("results").innerHTML += '<br>'+id_max+'<br>';
+
+}
+
+}
+
+function go_train(){
+timerId_train = setInterval(train, 10);
 }
