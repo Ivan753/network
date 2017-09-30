@@ -48,8 +48,9 @@ function identify_weights(){
 		
 //	}
 //}
-i++;
 console.log(i+' '+j);
+i++;
+
 
 if((i >= 1024)&&(j >= 30)){
 clearInterval(timerId);
@@ -86,7 +87,7 @@ j = 0;
 
 for(i = 0; i < 4*32*32; i+=4){
 	
-	if((img_data[i]!=0) || (img_data[i+1]!=0) || (img_data[i+2]!=0) || (img_data[i+3]!=0)){
+	if((img_data[i]!=255) && (img_data[i+1]!=255) && (img_data[i+2]!=255) /* (img_data[i+3]!=0)*/){
 		
 		enters[j] = 1.0;
 	
@@ -99,15 +100,16 @@ for(i = 0; i < 4*32*32; i+=4){
 	j++;
 }
 	
-console.log(enters);
+//console.log(enters);
 }
 
 
 //Basic go-----------------------
 max = 0;
-id_max = 0;
+id_max = 0;	 
 function recognize(){
-	
+max = 0;
+id_max = 0;	
 //first layer
 for(i = 0; i<30; i++){
 	
@@ -161,7 +163,7 @@ for(i = 0; i<10; i++){
 	max = output[i];
 	}
 }
-console.log(output);
+//console.log(output);
 	
 }
 
@@ -171,10 +173,10 @@ epoh = 7500;
 
 learn_img = [];
 
-for(i = 0; i<10; i++){
+for(u = 0; u<10; u++){
 		
-	learn_img[i] = new Image;	
-	learn_img[i].src = i+'.png';
+	learn_img[u] = new Image;	
+	learn_img[u].src = u+'.png';
 
 }
 
@@ -211,13 +213,13 @@ progress = Math.round((p / epoh)*100);
 	for(i = 0; i<10; i++){
 		
 		if(i==id_max){
-			basic_error[i] = 1 - output[i];
-		}else{
-			basic_error[i] = 0 - output[i];
+			basic_error[i] = output[i] - 1;
+		}else{  
+			basic_error[i] = output[i] - 0;
 		}
 	
 	}
-	
+	//console.log('3;5ijnn ');
 //последний слой 
 for(i = 0; i<10; i++){
 
@@ -225,34 +227,54 @@ for(i = 0; i<10; i++){
 	
 	for(j = 0; j<30; j++){
 		weights_delta[i][j] = basic_error[i]*output[i]*(1 - output[i]);
+			//console.log('1  '+basic_error[i]+'    '+weights_delta[i][j]);
 		weights_3[i][j] = weights_3[i][j] - values_2[j]*weights_delta[i][j]*learn_rate;
 	}
 }
 	
 //предпоследний слой	
+	//отдельно считаем ошибку
+	for(i = 0; i<30; i++){
+		weights_delta_2[i] = new Array();
+		for(j = 0; j<10; j++){	
+		errors[i] = weights_3[j][i]*weights_delta[j][i];
+		}
+	}
+	
 	for(i = 0; i<30; i++){
 		weights_delta_2[i] = new Array();
 		for(j = 0; j<30; j++){	
-		
-		errors[i] = weights_3[i][j]*weights_delta[i][j];
+			
 		weights_delta_2[i][j] = (errors[i]*values_2[j])*(1 - values_2[i]);
+			//console.log('1  '+errors[i]+'    '+weights_delta_2[i][j]);
 		weights_2[i][j] = weights_2[i][j] - values_1[j]*weights_delta_2[i][j]*learn_rate;
 		}
 
 	}
 //второй слой	
+	//jnltkmyj cxbnftv jib,re
+	
+	for(i = 0; i<30; i++){
+		
+		for(j = 0; j<30; j++){	
+			
+		errors[i] = weights_2[i][j]*weights_delta_2[i][j];
+		}
+
+	}
+	
 	for(i = 0; i<30; i++){
 		weights_delta_3[i] = new Array();
 		for(j = 0; j<1024; j++){	
 		
-		errors[i] = weights_2[i][j]*weights_delta_2[i][j];
 		weights_delta_3[i][j] = (errors[i]*enters[j])*(1 - enters[j]);//дельта будет всегда равняться нулю
+			//console.log('1  '+errors[i]+'    '+weights_delta_3[i][j]);
 		weights_1[i][j] = weights_1[i][j] - enters[j]*weights_delta_3[i][j]*learn_rate;
 		}
 
 	}
 
-	document.getElementById("results").innerHTML = 'Progress: '+progress+'%<br>Error: '+error;
+	//document.getElementById("results").innerHTML = 'Progress: '+progress+'%<br>Error: '+error;
 
 	//}
 //}
@@ -264,8 +286,10 @@ alert("Stop");
 document.getElementById("results").innerHTML += '<br>'+id_max+'<br>';
 
 }
-
+console.log(p);
 }
+
+
 
 function go_train(){
 timerId_train = setInterval(train, 10);
