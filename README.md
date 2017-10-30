@@ -1,1 +1,1 @@
-This project was been freeze
+This project was been frozen
