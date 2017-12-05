@@ -17,27 +17,27 @@ V = [];
 Y = 0;
 
 //инициализация весов случайными значениями [0, 1]
-for(i = 0; i < 2; i++){
+for(let i = 0; i < 2; i++){
 	
 	W[i] = [];
 	
 	for(j = 0; j < 3; j++){
-		W[i][j] = Math.random();
+		W[i][j] = Math.random()*Math.pow(-1, (Math.round(Math.random()*2 + 1)));
 	}
 	
 }
 
-for(i = 0; i < 2; i++){
-	V[i] = Math.random();
+for(let i = 0; i < 2; i++){
+	V[i] = Math.random()*Math.pow(-1, (Math.round(Math.random()*2 + 1)));
 }
 
 function go(inputs){
 	
-	for(i = 0; i < 2; i++){
+	for(let i = 0; i < 2; i++){
 		
 		hidden[i] = 0;
 		
-		for(j = 0; j < 3; j++){
+		for(let j = 0; j < 3; j++){
 			
 			hidden[i] += inputs[j]*W[i][j];
 		
@@ -61,21 +61,22 @@ inter = 0;
 function train(){
 	
 error = 0;
-d = 0;		//дельта для весов скрытого слоя
-offset = 0; //смещение
-offsets = [];//смещения 
-h = 1;    //скорость обучения
-d1 = [];	//дельты весов входных нейронов
+d = 0;				//дельта для весов скрытого слоя
+offset = 0; 		//смещение для весов нейронов скрытого слоя
+offsets = [];		//смещения для весов нейронов входного слоя
+h = 1;    			//скорость обучения
+d1 = [];			//дельты весов входных нейронов
 	
 
-for(u = 0; u < epoch; u++){
+for(inter = 0; inter < epoch; inter++){
 	
-for(i1 = 0; i1 < training_sample.length; i1++){
+for(let i1 = 0; i1 < training_sample.length; i1++){
 	
 	go(training_sample[i1]);
 	
 	error = 1/2 * (Y - training_sample[i1][3])*(Y - training_sample[i1][3]);
 	
+	//считаем дельту для Y
 	d = Y - training_sample[i1][3];
 	
 	//Считаем смещение для веса первого нейрона из скрытого слоя
@@ -95,27 +96,21 @@ for(i1 = 0; i1 < training_sample.length; i1++){
 	
 	//----------------переходим к весам входных нейронов
 	
-	for(j = 0; j < 2; j++){
+	for(let j = 0; j < 2; j++){
 		
 		d1[j] = d*(Y*(1 - Y))*V[0] + d*(Y*(1 - Y))*V[1];
 		offsets[j] = [];
 		
-		for(k = 0; k < 3; k++){
+		for(let k = 0; k < 3; k++){
 			
 			offsets[j][k] = d1[j]*hidden[j]*(1.01 - hidden[j])*training_sample[i1][k];
 	
 			W[j][k] = W[j][k] - h*offsets[j][k];	
-			//console.log(0);
 
 		}
-		//console.log(1);
 
-		
 	}
-	//console.log(333);
 
-	
-	
 	// d1[0] = d*(Y(1 - Y))*V[0] + d*(Y(1 - Y))*V[0];
 	
 	// offsets[0] = d1[0]*hidden[0]*(1 - hidden[0])*training_sample[i][0];
@@ -124,9 +119,9 @@ for(i1 = 0; i1 < training_sample.length; i1++){
 	
 	
 }
-//console.log(u);
+
 }
-console.log(u);
+console.log(inter);
 	
 }
 

@@ -1,1 +1,1 @@
-This project had been frozen
+In developing
